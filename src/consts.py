@@ -1,15 +1,20 @@
 from importlib.metadata import version
 
+
 __title__ = "anchor4git"
-__description__ = "A highly-minimal workflow tool for small teams using Git."
+__description__ = "A minimal git client CLI for remote repositories."
 __version__ = version("anchor4git")
 __author__ = "Abhirup Hajra"
 __license__ = "MIT"
 __url__ = "https://fx0.qzz.io"
 
-CMDS = [ # Available commands
-    "info",
+
+# Available commands
+CMDS = [
+    "init",
     "i",
+    "info",
+    "d",
     "dashboard",
     "save",
     "s",
@@ -23,9 +28,11 @@ CMDS = [ # Available commands
     "c",
 ]
 
+
 DEFAULT_NAME = "Anchor4Git Client"
 DEFAULT_EMAIL = "anchor4git@local.dev"
 CONFIG_FILE = ".git\\anchor4git.json"
+
 
 __all__ = [
     "__title__",

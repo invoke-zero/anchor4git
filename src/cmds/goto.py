@@ -1,11 +1,10 @@
 from subprocess import CalledProcessError
 from typer import Argument, Option
-
 from sys import exit
+
 from ..utils import *
 
 
-# Command for going to a previous save: `a4g goto/g` #
 def goto_cmd(
     commit: str = Argument(None, help="Commit hash or HEAD."),
     reset: bool = Option(False, "--reset", help="Reset workspace to the commit."),
@@ -14,15 +13,24 @@ def goto_cmd(
 ):
     """Goto any previous save temporarily or permanently."""
 
+
     # ───── SAFETY GATEWAY ────────────────────────────────────────────────── #
-    if not is_repo(): die("Not a git repository.")
+    git_existance_safety()
+    repo_existance_safety()
+
     if not commit: die("Usage: a4g goto <commit> [--reset] [--stay]")
+
 
     # ───── RETURN TO HEAD ────────────────────────────────────────────────── #
     if commit == "HEAD":
+
+        # Goto HEAD
         git("checkout", git("rev-parse", "--abbrev-ref", "@{-1}").stdout.strip())
+
         head_branch = git("branch", "--show-current").stdout.strip()
         ok(f"Returned to '{head_branch}'")
+
+        # Try to restore changes
         try:
             if "stash@" in git("stash", "list").stdout:
                 git("stash", "pop")
@@ -36,8 +44,10 @@ def goto_cmd(
 
         exit(1)
 
+
     if detached():
         die("This command is unavailable with a save ID while you are not on HEAD. First use `a4g goto HEAD`.")
+
 
     # ───── RESOLVE FULL COMMIT ID AND PRINT INFO ────────────────────────────────────────────────── #
     try: full = git("rev-parse", "--verify", commit).stdout.strip()
@@ -48,7 +58,8 @@ def goto_cmd(
     msg = git("log", "-1", "--pretty=format:%s (%h) by %an %ar", full).stdout
     info(f"Target commit: {msg}")
 
-    # ───── SHOW PREVIEW ────────────────────────────────────────────────── #
+
+    # ───── SHOW PREVIEW IF ASKED ────────────────────────────────────────────────── #
     if preview:
         preview_block(
             "goto",
@@ -61,22 +72,29 @@ def goto_cmd(
         next_step("run the same command again without --preview")
         return
 
+
     # ───── RESET MODE ────────────────────────────────────────────────── #
     if reset:
         if dirty(): autosave(f"anchor4git: Auto Save before goto {commit}")
 
-        confirm_or_cancel(f"Reset the workspace to {commit}? This is destructive.")
+        confirm_or_cancel(f"Reset the workspace to {ommit}? This is destructive.")
+
         warn(f"Resetting workspace to {commit}.")
 
         git("checkout", full, ".")
         git("clean", "-fd")
+        
         final_commit_name = git("log", "-1", "--pretty=format:%s", full).stdout
+        
         autosave(f"RESET of: {final_commit_name}")
+        
         ok(f"Workspace reset to {commit}")
         next_step("run 'anchor4git save' to record new changes")
+        
         return
 
-    # ───── TEMPORARY/STAY MODE ────────────────────────────────────────────────── #
+
+    # ───── TEMPORARY & STAY MODE ────────────────────────────────────────────────── #
     stashed = False
 
     try:
@@ -95,6 +113,7 @@ def goto_cmd(
         input("Press `Enter` to return to HEAD... ")
 
     finally:
+
         if not stay:
             git("checkout", head_branch)
 
@@ -106,3 +125,4 @@ def goto_cmd(
                     warn("Could not auto-apply stash. Run 'git stash list'.")
 
             ok(f"Returned to '{head_branch}'")
+

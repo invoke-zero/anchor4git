@@ -1,6 +1,6 @@
 """
 Anchor4Git
- ~ A highly-minimal workflow tool for small teams using Git.
+ ~ A minimal git client CLI for remote repositories.
 """
 
 from __future__ import annotations

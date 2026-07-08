@@ -10,4 +10,4 @@ These are the versions which are currently being supported with security updates
 
 ## Reporting a Vulnerability
 
-For non-critical vulnerabilities, create a issue. If the vulnerability is critical and can be exploited for the wrong causes, email us at [us@fx0.qzz.io](mailto:us@fx0.qxx.io).
+For non-critical vulnerabilities, create a issue. If the vulnerability is critical and can be exploited for the wrong causes, email us at [contact@function0.qzz.io](mailto:contact@function0.qzz.io).

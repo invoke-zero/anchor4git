@@ -8,17 +8,18 @@ module-root = ""
 
 [project]
 name = "anchor4git"
-version = "0.1.0"
-description = "A highly-minimal workflow tool for small teams using Git."
+version = "0.1.1"
+description = "A minimal git client CLI for remote repositories."
 readme = "README.md"
 requires-python = ">=3.9"
-license = { text = "MIT" }
+license = { text = "FSPL-1.0" }
 
 authors = [
     { name = "Abhirup Hajra", email = "me@abhirup.co.in" },
 ]
+
 maintainers = [
-    { name = "Flint Studios", email = "contact@fx0.qzz.io" },
+    { name = "Flint Studios", email = "contact@function0.qzz.io" },
 ]
 
 keywords = ["anchor", "git", "workflow", "vcs", "anchor4git"]
@@ -31,6 +32,7 @@ classifiers = [
 
 dependencies = [
     "typer>=0.16",
+    "rich>=10.0.0"
 ]
 
 [project.optional-dependencies]
@@ -42,7 +44,7 @@ anchor4git = "src:main"
 a4g = "src:main"
 
 [project.urls]
-Homepage = "https://github.com/flint-studios/anchor"
-Documentation = "https://github.com/flint-studios/anchor"
-Repository = "https://github.com/flint-studios/anchor"
-Issues = "https://github.com/flint-studios/anchor/issues"
+Homepage = "https://github.com/flint-studios/anchor4git"
+Documentation = "https://github.com/flint-studios/anchor4git"
+Repository = "https://github.com/flint-studios/anchor4git"
+Issues = "https://github.com/flint-studios/anchor4git/issues"

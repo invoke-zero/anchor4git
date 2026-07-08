@@ -27,7 +27,7 @@ A highly-minimal workflow tool for small teams (2–4 people) using Git. Anchor4
 ## Installation
 ### For non-contributors:
 ```bash
-pip install --extra-index-url=https://fx0.qzz.io/simple anchor4git
+pipx anchor4git
 ```
 
 ### For contributors:

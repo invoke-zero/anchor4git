@@ -1,3 +1,4 @@
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeRemainingColumn
 from subprocess import CalledProcessError
 from rich.console import Console
 from sys import exit, stdout
@@ -6,7 +7,6 @@ from rich.panel import Panel
 from rich.text import Text
 from rich import print
 
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeRemainingColumn
 
 from ..utils import *
 from ..consts import *
@@ -14,11 +14,14 @@ from ..consts import *
 
 console = Console()
 
-# Command for information dashboard: `a4g info/i/dashboard` #
+
 def info_cmd():
     """Show rich information about the repository."""
 
-    if not is_repo(): die("Not a repository. Start with 'a4g fetch <url>'.")
+    # ───── SAFETY GATEWAY ────────────────────────────────────────────────── #
+    git_existance_safety()
+    repo_existance_safety()
+
 
     # ───── INFORMATION COLLECTION  ────────────────────────────────────────────────── #
     with Progress(
@@ -29,10 +32,16 @@ def info_cmd():
 
         task = progress.add_task("[green]Fetching data...", total=100)
 
-        if not get_if_remote_empty(): git("fetch", resolve_origin())
+
+        # FETCH ORIGIN & SETUP #
+
+        if not get_if_origin_empty(): git("fetch", resolve_origin())
         git("add", "."); git("reset", CONFIG_FILE)
 
         progress.update(task, advance=10)
+
+
+        # GET SYNC STATUS #
 
         try:
             ahead = int(git("rev-list", "--count", f"FETCH_HEAD..HEAD", check=True).stdout or "0")
@@ -42,9 +51,15 @@ def info_cmd():
 
         progress.update(task, advance=10)
 
+
+        # READ CONFIG #
+
         cfg = cfg_read()
 
         progress.update(task, advance=10)
+
+
+        # GET BRANCH AND WORKSPACE STATUS #
 
         branch = git("branch", "--show-current").stdout.strip()
 
@@ -52,23 +67,32 @@ def info_cmd():
 
         progress.update(task, advance=10)
 
+
+        # GET LAST SAVE #
+
         try: last = git("log", "-1", "--pretty=format:%s (%ar)").stdout.strip()
         except: last = "No saves yet."
 
         progress.update(task, advance=10)
 
-        # Get changes
+
+        # GET CHANGES #
+
         status = git("status", "--short").stdout.strip()
 
         progress.update(task, advance=10)
 
-        # Get contributors
+
+        # GET CONTRIBUTORS #
+
         try: authors = git("shortlog", "-sne", "HEAD", check=True).stdout.splitlines()
         except CalledProcessError: authors = []
 
         progress.update(task, advance=10)
 
-        # Get full repo size
+
+        # GET REPO SIZE #
+        
         size = "Unknown"
         for line in git("count-objects", "-vH").stdout.splitlines():
             if line.strip().startswith("size:"):
@@ -76,20 +100,26 @@ def info_cmd():
 
         progress.update(task, advance=10)
 
-        # Get commit history
+        
+        # GET SAVES/COMMITS #
+
         try: log = list(reversed( git("log", "--all", "--pretty=format:%h\t | %ar\t | %an\t | %ae\t | %s").stdout.splitlines() ))
         except: log = []
 
         progress.update(task, advance=10)
+
+
+        # GET SHORT ID FOR THE HEAD SAVE #
 
         try: head_short = git("rev-parse", "--short", "HEAD", check=True).stdout.strip() # Get current short commit id
         except: head_short = ""
 
         progress.update(task, advance=10)
 
+
     # ───── SHOW INFORMATION  ────────────────────────────────────────────────── #
 
-    # HEADER PANEL
+    # HEADER PANEL #
     print(Panel.fit(
         f"[bold]ANCHOR4GIT DASHBOARD[/bold]\n"
         f"[dim]Workspace:[/dim] {status_text}        "
@@ -99,22 +129,23 @@ def info_cmd():
     ))
 
 
-    # GENERAL INFORMATION TABLE
+    # GENERAL INFORMATION TABLE #
     table = Table(show_header=False, box=None)
-    table.add_row("Remote Repository:", cfg.get("origin_url", "N/A"))
-    table.add_row("Your Username:", cfg.get("name", "No name"))
-    table.add_row("Your Email:", cfg.get("email", "no email"))
+    table.add_row("Origin Repository:", cfg.get("origin_url", "Unknown"))
+    table.add_row("Your Username:", cfg.get("name", "Unknowne"))
+    table.add_row("Your Email:", cfg.get("email", "Unknown"))
     table.add_row("Last Save:", last)
 
     print(table)
 
-    # CONTRIBUTORS TABLE
+
+    # CONTRIBUTORS TABLE #
     if authors:
         section_header("Contributors")
         for a in authors: print(f" • {a.replace(chr(9), ' ').strip()}")
 
 
-    # CHANGES
+    # CHANGES #
     section_header("Changes in the workspace")
     if status: print(status)
     else: print("[dim]No changes[/dim]")

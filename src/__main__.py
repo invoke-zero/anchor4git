@@ -5,7 +5,8 @@ from sys import argv
 from .utils import *
 from .consts import *
 
-# Import commands
+# Import commands for the app
+from .cmds.init import init_cmd
 from .cmds.info import info_cmd
 from .cmds.save import save_cmd
 from .cmds.fetch import fetch_cmd
@@ -24,8 +25,11 @@ app = Typer(
 
 
 # ───── COMMAND REGISTRATION ────────────────────────────────────────────────── #
+app.command("init")(init_cmd)
+app.command("i", hidden=True)(init_cmd)
+
 app.command("info")(info_cmd)
-app.command("i", hidden=True)(info_cmd)
+app.command("d", hidden=True)(info_cmd)
 app.command("dashboard", hidden=True)(info_cmd)
 
 app.command("save")(save_cmd)
@@ -50,6 +54,6 @@ def main():
 
     if args and not args[0].startswith("-"):
         known = CMDS
-        if args[0] not in known: suggest_command(args[0])
+        if args[0] not in known: suggest_command(args[0]) # Suggest command if it doesn't match
 
     app()
